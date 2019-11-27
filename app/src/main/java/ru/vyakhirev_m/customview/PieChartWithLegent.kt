@@ -1,5 +1,6 @@
 package ru.vyakhirev_m.customview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -14,38 +15,43 @@ import androidx.annotation.RequiresApi
 class PieChart : View {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-//
-    private val paint= Paint(Paint.ANTI_ALIAS_FLAG)
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
-    private val padding=25f
+    //Colors
+    private val bgColor = Color.rgb(46, 51, 89)
+    private val firstColor = Color.rgb(0, 190, 224)
+    private val secondColor = Color.rgb(255, 225, 0)
+    private val thirdColor = Color.rgb(180, 152, 207)
+    private val legendColorDark = Color.rgb(0, 0, 0)
+    private val legendColorLight = Color.rgb(255, 255, 255)
+    //Parameters
+    private var diameterPie = 0f
+    lateinit var rectPie: RectF
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val padding = 25f
 
+    //Count percents for pie chart and add some data
+    data class Client(val name: String = "Kan", var trainings: Int, var pays: Int)
 
-    private val bgColor=Color.rgb(46,51,89)
-    private val firstColor=Color.rgb(0,190,224)
-    private val secondColor=Color.rgb(255,225,0)
-    private val thirdColor=Color.rgb(180,152,207)
-    private val legendColorDark=Color.rgb(0,0,0)
-    private val legendColorLight=Color.rgb(255,255,255)
+    val Clients = listOf<Client>(
+        Client("Иванов", 15, 15000),
+        Client("Петров", 6, 19000),
+        Client("Сидоренко", 17, 18000)
+    )
 
-    var rightCorner:Float=0f
-    lateinit var rectPie:RectF
-
-//    private var maxValue : Int = 0
-//    private var widthPerView = 0
-//    private var heightPerValue = 0
-
-    fun PercentCount(Clients:List<Client>,pos:Int=0):Float {
-        var totalAmount=0f
-        for (client in Clients) totalAmount+=client.pays
-        return (Clients[pos].pays*100/totalAmount)*3.6f
+    private fun percentCount(Clients: List<Client>, pos: Int = 0): Float {
+        var totalAmount = 0f
+        for (client in Clients) totalAmount += client.pays
+        return (Clients[pos].pays * 100 / totalAmount) * 3.6f
     }
-    var firstItemAngel=PercentCount(Clients)
-    var secondItemAngel=PercentCount(Clients,1)
-    var thirdItemAngel=PercentCount(Clients,2)
 
-
-    //Draw rectagle vdol ili poperek
+    var firstItemAngel = percentCount(Clients)
+    var secondItemAngel = percentCount(Clients, 1)
+    var thirdItemAngel = percentCount(Clients, 2)
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val desiredWidth = 600
@@ -54,87 +60,110 @@ class PieChart : View {
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
         val heightSize = MeasureSpec.getSize(heightMeasureSpec)
-        var width: Int= 0
-        var height: Int= 0
+        var width = 0
+        var height= 0
 
-        when(widthMode){
-            MeasureSpec.EXACTLY->{
-                width=widthSize
+        when (widthMode) {
+            MeasureSpec.EXACTLY -> {
+                width = widthSize
             }
-            MeasureSpec.AT_MOST->{
-                width=Math.min(desiredWidth,widthSize)
+            MeasureSpec.AT_MOST -> {
+                width = Math.min(desiredWidth, widthSize)
             }
-            MeasureSpec.UNSPECIFIED->{
-                width=desiredWidth
+            MeasureSpec.UNSPECIFIED -> {
+                width = desiredWidth
             }
         }
 
-        when(heightMode){
-            MeasureSpec.EXACTLY->{
-                height=heightSize
+        when (heightMode) {
+            MeasureSpec.EXACTLY -> {
+                height = heightSize
             }
-            MeasureSpec.AT_MOST->{
-                height=Math.min(desiredHeight,heightSize)
+            MeasureSpec.AT_MOST -> {
+                height = Math.min(desiredHeight, heightSize)
             }
-            MeasureSpec.UNSPECIFIED->{
-                height=desiredHeight
+            MeasureSpec.UNSPECIFIED -> {
+                height = desiredHeight
             }
         }
         setMeasuredDimension(width, height)
     }
 
+    @SuppressLint("DrawAllocation")
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onDraw(canvas: Canvas) {
         canvas.drawColor(bgColor)
-        paint.color=firstColor
-        rightCorner= Math.min(height,width).toFloat()
-        rectPie= RectF(padding,padding,rightCorner-padding, rightCorner-padding)
-        canvas.drawArc(rectPie,0f,firstItemAngel,true,paint)
-//        canvas.drawRoundRect(rectPadding,)
-        paint.color=secondColor
-        canvas.drawArc(rectPie,firstItemAngel,secondItemAngel,true,paint)
-        paint.color=thirdColor
-        canvas.drawArc(rectPie,secondItemAngel+firstItemAngel,thirdItemAngel,true,paint)
+
+
+        val nextLegendRectOffset: Float = 0.1f * height
+        val nextLegendTextOffset: Float = 0.55f * nextLegendRectOffset
+
+        paint.color = firstColor
+        diameterPie = Math.min(height, width).toFloat()
+        rectPie = RectF(padding, padding, diameterPie - padding, diameterPie - padding)
+        canvas.drawArc(rectPie, 0f, firstItemAngel, true, paint)
+        paint.color = secondColor
+        canvas.drawArc(rectPie, firstItemAngel, secondItemAngel, true, paint)
+        paint.color = thirdColor
+        canvas.drawArc(rectPie, secondItemAngel + firstItemAngel, thirdItemAngel, true, paint)
 //Draw first legend
-        paint.color=firstColor
-        canvas.drawRoundRect(padding,601f,width*0.85f,670f,20f,25f,paint)
-        paint.color=legendColorLight
-        paint.textSize= 50F
-        canvas.drawText(Clients[0].name+" "+Clients[0].pays.toString(),1.5f*padding,650f,paint)
+        paint.color = firstColor
+        canvas.drawRoundRect(
+            padding,
+            diameterPie,
+            width * 0.85f,
+            diameterPie + 60f,
+            20f,
+            25f,
+            paint
+        )
+        paint.color = legendColorLight
+        paint.textSize = 40F
+        canvas.drawText(
+            Clients[0].name + " " + Clients[0].pays.toString(),
+            1.5f * padding,
+            diameterPie + nextLegendTextOffset,
+            paint
+        )
 //Draw second legend
-        paint.color=secondColor
-        canvas.drawRoundRect(padding,690f,width*0.85f,760f,20f,25f,paint)
-        paint.color=legendColorDark
-        paint.textSize= 50F
-        canvas.drawText(Clients[1].name+" "+Clients[1].pays.toString(),1.5f*padding,740f,paint)
-//Draw first legend
-        paint.color=thirdColor
-        canvas.drawRoundRect(padding,780f,width*0.85f,850f,20f,25f,paint)
-        paint.color=legendColorLight
-        paint.textSize= 50F
-        canvas.drawText(Clients[2].name+" "+Clients[2].pays.toString(),1.5f*padding,830f,paint)
+        paint.color = secondColor
+        canvas.drawRoundRect(
+            padding,
+            diameterPie + nextLegendRectOffset,
+            width * 0.85f,
+            diameterPie + nextLegendRectOffset + 60f,
+            20f,
+            25f,
+            paint
+        )
+        paint.color = legendColorDark
+        paint.textSize = 40F
+        canvas.drawText(
+            Clients[1].name + " " + Clients[1].pays.toString(),
+            1.5f * padding,
+            diameterPie + nextLegendRectOffset + nextLegendTextOffset,
+            paint
+        )
+//Draw third legend
+        paint.color = thirdColor
+        canvas.drawRoundRect(
+            padding,
+            diameterPie + 2f * nextLegendRectOffset,
+            width * 0.85f,
+            diameterPie + 2f * nextLegendRectOffset + 60f,
+            20f,
+            25f,
+            paint
+        )
+        paint.color = legendColorLight
+        paint.textSize = 40F
+        canvas.drawText(
+            Clients[2].name + " " + Clients[2].pays.toString(),
+            1.5f * padding,
+            diameterPie + 2f * nextLegendRectOffset + nextLegendTextOffset,
+            paint
+        )
     }
 }
 
-//class Legend:View{
-//    constructor(context: Context?) : super(context)
-//    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-//    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-//
-//    private val paint= Paint(Paint.ANTI_ALIAS_FLAG)
-//
-//    private val rectPadding=25f
-//
-//
-//    private val bgColor=Color.rgb(46,51,89)
-//    private val firstColor=Color.rgb(0,190,224)
-//    private val secondColor=Color.rgb(255,225,0)
-//    private val thirdColor=Color.rgb(180,152,207)
-//
-//
-//}
-data class Client(val name:String="Kan",var trenings:Int,var pays:Int)
-val Clients= listOf<Client>(
-    Client("Иванов",15,15000),
-    Client("Петров",6,19000),
-    Client("Сидорренко",17,18000))
+
