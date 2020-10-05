@@ -12,15 +12,11 @@ import android.view.View
 import androidx.annotation.RequiresApi
 
 
-class PieChart : View {
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    )
-
+class PieChart @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+    ) : View(context, attrs, defStyleAttr) {
     //Colors
     private val bgColor = Color.rgb(46, 51, 89)
     private val firstColor = Color.rgb(0, 190, 224)
@@ -118,11 +114,12 @@ class PieChart : View {
             paint
         )
         paint.color = legendColorLight
+//        paint.color = Color.BLACK
         paint.textSize = 40F
         canvas.drawText(
             Clients[0].name + " " + Clients[0].pays.toString(),
-            1.5f * padding,
-            diameterPie + nextLegendTextOffset,
+            padding+10F,
+            diameterPie + 55f,
             paint
         )
 //Draw second legend
@@ -140,7 +137,7 @@ class PieChart : View {
         paint.textSize = 40F
         canvas.drawText(
             Clients[1].name + " " + Clients[1].pays.toString(),
-            1.5f * padding,
+            padding+10F,
             diameterPie + nextLegendRectOffset + nextLegendTextOffset,
             paint
         )
@@ -159,7 +156,7 @@ class PieChart : View {
         paint.textSize = 40F
         canvas.drawText(
             Clients[2].name + " " + Clients[2].pays.toString(),
-            1.5f * padding,
+            padding+10F,
             diameterPie + 2f * nextLegendRectOffset + nextLegendTextOffset,
             paint
         )
