@@ -2,10 +2,7 @@ package ru.vyakhirev_m.customview
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
 import android.os.Build
 import android.util.AttributeSet
 import android.view.View
@@ -29,6 +26,7 @@ class PieChart @JvmOverloads constructor(
     lateinit var rectPie: RectF
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val padding = 25f
+    private val legendHeight = 60f
 
     //Count percents for pie chart and add some data
     data class Client(val name: String = "Kan", var trainings: Int, var pays: Int)
@@ -116,10 +114,14 @@ class PieChart @JvmOverloads constructor(
         paint.color = legendColorLight
 //        paint.color = Color.BLACK
         paint.textSize = 40F
+        val rect = Rect()
+
+        var text=Clients[0].name + " " + Clients[0].pays.toString()
+        paint.getTextBounds(text, 0, text.length - 1, rect)
         canvas.drawText(
-            Clients[0].name + " " + Clients[0].pays.toString(),
+             text,
             padding+10F,
-            diameterPie + 55f,
+            diameterPie + legendHeight-padding  ,
             paint
         )
 //Draw second legend
