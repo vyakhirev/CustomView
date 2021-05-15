@@ -1,5 +1,5 @@
 # CustomView
 My otus homework number two.
  <p>
-  <image src="pie_chart.png"> <image src="detail.png">
+  <image src="pie_chart.png"> 
     </p>
